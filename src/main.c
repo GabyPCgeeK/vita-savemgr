@@ -86,13 +86,14 @@ int cleanup_prev_inject(applist *list) {
     draw_start();
     if (is_encrypted_eboot(info.eboot)) {
         char patch[256];
-        char patch_eboot[256];
-        snprintf(patch, 256, "ux0:patch/%s", info.title_id);
+        //char patch_eboot[256];
+		sprintf(patch, "ux0:rePatch/%s", info.title_id);
+        /*snprintf(patch, 256, "ux0:patch/%s", info.title_id);
         snprintf(patch_eboot, 256, "ux0:patch/%s/eboot.bin", info.title_id);
         if (!is_dumper_eboot(patch_eboot)) {
             unlock_psbutton();
             return 0;
-        }
+        }*/
 
         draw_text(0, "Cleaning up old data...", white);
         ret = rmdir(patch);
@@ -102,7 +103,7 @@ int cleanup_prev_inject(applist *list) {
         }
         draw_text(1, "Done", white);
 
-        snprintf(backup, 256, "ux0:patch/%s_orig", info.title_id);
+        /*snprintf(backup, 256, "ux0:patch/%s_orig", info.title_id);
         if (is_dir(backup)) {
             draw_text(3, "Restoring patch...", white);
             ret = mvdir(backup, patch);
@@ -111,7 +112,7 @@ int cleanup_prev_inject(applist *list) {
                 goto exit;
             }
             draw_text(4, "Done", white);
-        }
+        }*/
         ret = 0;
     } else {
         draw_text(0, "Cleaning up old data...", white);
@@ -397,13 +398,17 @@ int injector_main() {
 
                 if (is_encrypted_eboot(curr->eboot)) {
                     char patch[256];
+					char epatch[256];
                     draw_text(2, "Injecting (encrypted game)...", white);
-                    sprintf(patch, "ux0:patch/%s", curr->title_id);
-                    sprintf(backup, "ux0:patch/%s_orig", curr->title_id);
-
-                    snprintf(buf, 255, "%s/eboot.bin", patch);
+                    //sprintf(patch, "ux0:patch/%s", curr->title_id);
+                    //sprintf(backup, "ux0:patch/%s_orig", curr->title_id);
+					sprintf(patch, "ux0:rePatch/%s", curr->title_id);
+					sprintf(epatch, "ux0:rePatch/%s/eboot.bin", curr->title_id);
+					if (!is_dir(patch))
+						mkdir(patch, 0777);
+                    //snprintf(buf, 255, "%s/eboot.bin", patch);
                     // need to backup patch dir
-                    if (is_dir(patch) && !is_dumper_eboot(buf)) {
+                    /*if (is_dir(patch) && !is_dumper_eboot(buf)) {
                         snprintf(buf, 255, "Backing up %s to %s...", patch, backup);
                         draw_text(4, buf, white);
                         rmdir(backup);
@@ -415,12 +420,13 @@ int injector_main() {
                             break;
                         }
                         draw_text(5, "Done", green);
-                    }
+                    }*/
 
                     // inject dumper to patch
                     snprintf(buf, 255, "Installing dumper to %s...", patch);
                     draw_text(7, buf, white);
-                    ret = copydir("ux0:app/SAVEMGR00", patch);
+                    //ret = copydir("ux0:app/SAVEMGR00", patch);
+					ret = copyfile("ux0:app/SAVEMGR00/eboot.bin", epatch);
                     // TODO restore patch
                     if (ret < 0) {
                         unlock_psbutton();
@@ -430,7 +436,7 @@ int injector_main() {
                     }
                     draw_text(8, "Done", green);
 
-                    snprintf(patch, 255, "ux0:patch/%s/sce_sys/param.sfo", curr->title_id);
+                    /*snprintf(patch, 255, "ux0:patch/%s/sce_sys/param.sfo", curr->title_id);
                     //Restoring or Copying?
                     snprintf(buf, 255, "Copying param.sfo to %s...", patch);
                     draw_text(10, buf, white);
@@ -444,7 +450,7 @@ int injector_main() {
                         state = INJECTOR_MAIN;
                         break;
                     }
-                    draw_text(11, "Done", green);
+                    draw_text(11, "Done", green);*/
                 } else {
                     draw_text(2, "Injecting (decrypted game)...", white);
                     ret = -1;
